@@ -11,66 +11,58 @@ from nlp_module.llm_context import LLMClient
 
 
 def test_llm_with_all_prompts():
-    system_prompts = {
-        "default": "You are a helpful assistant.",
-        "ru": "Отвечай на русском",
-    }
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    endpoint = os.getenv("OPENROUTER_ENDPOINT")
-    model = os.getenv("OPENROUTER_MODEL", "gpt-4o-mini")
-    if not api_key or not endpoint:
-        print("OPENROUTER_API_KEY или OPENROUTER_ENDPOINT не заданы.")
+    prompts = {"default": "You are a helpful assistant.", "ru": "Отвечай на русском"}
+    key = os.getenv("OPENROUTER_API_KEY")
+    chat_ep = os.getenv("OPENROUTER_CHAT_ENDPOINT")
+    chat_model = os.getenv("OPENROUTER_MODEL", "gpt-4o-mini")
+    if not key or not chat_ep:
+        print("OPENROUTER_API_KEY или OPENROUTER_CHAT_ENDPOINT не заданы")
         return
 
-    strat = OpenRouterStrategy(api_key, model, endpoint, system_prompts)
+    strat = OpenRouterStrategy(key, chat_model, chat_ep, prompts)
     client = LLMClient(strat)
-
     print("=== LLM через OpenRouterStrategy ===")
-    for name in system_prompts:
+    for name in prompts:
         try:
-            resp = client.generate("Hello!", system_prompt_name=name)
-            print(f"[{name}] {resp}\n")
+            out = client.generate("Hello!", system_prompt_name=name)
+            print(f"[{name}] {out}")
         except Exception as e:
-            print(f"Ошибка в LLM генерации для промпта '{name}': {e}")
+            print(f"[{name}] Ошибка: {e}")
 
 
 def test_yandex_embedder():
     iam = os.getenv("YANDEX_OAUTH_TOKEN")
     fid = os.getenv("YANDEX_FOLDER_ID")
     if not iam or not fid:
-        print("YANDEX_OAUTH_TOKEN или YANDEX_FOLDER_ID не заданы.")
+        print("YANDEX_OAUTH_TOKEN или YANDEX_FOLDER_ID не заданы")
         return
-
-    short_uri = f"emb://{fid}/text-search-query/latest"
-    long_uri  = f"emb://{fid}/text-search-doc/latest"
-
     print("=== YandexEmbedStrategy ===")
-    strat_y = YandexEmbedStrategy(iam, short_uri)
-    emb_y = Embedder(strat_y)
+    strat = YandexEmbedStrategy(iam, fid)  # передаём folder_id
+    emb = Embedder(strat)
     try:
-        v1 = emb_y.embed_short("Привет")
-        v2 = emb_y.embed_long("Привет " * 50)
-        print(f"Yandex short len={len(v1)}, long len={len(v2)}")
+        s = emb.embed_short("Привет")
+        l = emb.embed_long("Привет " * 50)
+        print(f"Yandex short len={len(s)}, long len={len(l)}")
     except requests.HTTPError as e:
-        print(f"Ошибка YandexEmbedStrategy: {e}")
+        print(f"Yandex error: {e}")
 
 
 def test_openrouter_embedder():
     key = os.getenv("OPENROUTER_API_KEY")
-    endpoint = os.getenv("OPENROUTER_ENDPOINT")
-    model = os.getenv("OPENROUTER_MODEL", "embed-model")
-    if not key or not endpoint:
-        print("OPENROUTER_API_KEY или OPENROUTER_ENDPOINT не заданы.")
+    embed_ep = os.getenv("OPENROUTER_EMBED_ENDPOINT")
+    embed_model = os.getenv("OPENROUTER_MODEL", "embedding-model")
+    if not key or not embed_ep:
+        print("OPENROUTER_API_KEY или OPENROUTER_EMBED_ENDPOINT не заданы")
         return
-
     print("=== OpenRouterEmbedStrategy ===")
-    strat_or = OpenRouterEmbedStrategy(key, model, endpoint)
-    emb_or = Embedder(strat_or)
+    strat = OpenRouterEmbedStrategy(key, embed_model, embed_ep)
+    emb = Embedder(strat)
     try:
-        vs = emb_or.embed_short("Test embedding via OpenRouter")
-        print(f"OpenRouter short len={len(vs)}")
+        qs = emb.embed_short("Test embed short via OpenRouter")
+        ql = emb.embed_long("Doc text " * 30)
+        print(f"OpenRouter short len={len(qs)}, long len={len(ql)}")
     except requests.HTTPError as e:
-        print(f"Ошибка OpenRouterEmbedStrategy: {e}")
+        print(f"OpenRouter error: {e}")
 
 if __name__ == "__main__":
     test_llm_with_all_prompts()
