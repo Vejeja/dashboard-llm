@@ -1,0 +1,29 @@
+[project]
+name = "dashboard-llm"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Vejeja",email = "kornilova.valeriia@gmail.com"}
+]
+readme = "README.md"
+
+[tool.poetry]
+packages = [
+    { include = "nlp_module", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"             
+requests = "^2.32.4"
+openai = ">=0.28.0,<1.0.0"
+huggingface-hub = "^0.34.3"
+python-dotenv = "^1.1.1"
+sentence-transformers = "^5.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+pytest-mock = "^3.14.1" 
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
