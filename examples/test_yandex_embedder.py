@@ -1,9 +1,8 @@
 from dotenv import load_dotenv
 import os
-
 from nlp_module.embedder import create_embedder
 
-load_dotenv()  
+load_dotenv()
 
 def manual_test():
     iam_token = os.getenv("YANDEX_OAUTH_TOKEN")
@@ -11,23 +10,39 @@ def manual_test():
     if not iam_token or not folder_id:
         raise RuntimeError("Не задан YANDEX_OAUTH_TOKEN или YANDEX_FOLDER_ID")
 
-    model_uri = f"emb://{folder_id}/text-search-query/latest"
-
-
-    embedder = create_embedder(iam_token, "yandex", model_uri)
-
+    print("\n=== Тест через folder_id ===")
+    emb1 = create_embedder(iam_token, "yandex", folder_id)
     text = "Привет, мир!"
-    emb_short = embedder.embed_short(text)
-    print("Short embedding length:", len(emb_short))
-    assert isinstance(emb_short, list) and len(emb_short) > 0
-    assert all(isinstance(x, float) for x in emb_short)
+    print("- короткий текст")
+    short1 = emb1.embed_short(text)
+    print("  length:", len(short1))
+    assert all(isinstance(x, float) for x in short1)
+    print("- длинный текст")
+    long1 = emb1.embed_long(text * 50)
+    print("  length:", len(long1))
+    assert all(isinstance(x, float) for x in long1)
 
-    emb_long = embedder.embed_long(text * 50)
-    print("Long embedding length:", len(emb_long))
-    assert isinstance(emb_long, list) and len(emb_long) > 0
-    assert all(isinstance(x, float) for x in emb_long)
+    print("\n=== Тест через явные URI ===")
+    short_uri = f"emb://{folder_id}/text-search-query/latest"
+    long_uri  = f"emb://{folder_id}/text-search-doc/latest"
 
-    print("Первый 5 элементов embedding:", emb_short[:5])
+    print("- только короткий URI")
+    emb_short_only = create_embedder(iam_token, "yandex", short_uri)
+    s2 = emb_short_only.embed_short(text)
+    print("  short length:", len(s2))
+    assert all(isinstance(x, float) for x in s2)
+    l2 = emb_short_only.embed_long(text)
+    print("  long-via-short length:", len(l2))
+    assert all(isinstance(x, float) for x in l2)
+
+    print("- только длинный URI")
+    emb_long_only = create_embedder(iam_token, "yandex", long_uri)
+    s3 = emb_long_only.embed_short(text)
+    print("  short-via-long length:", len(s3))
+    assert all(isinstance(x, float) for x in s3)
+    l3 = emb_long_only.embed_long(text * 10)
+    print("  long length:", len(l3))
+    assert all(isinstance(x, float) for x in l3)
 
 if __name__ == "__main__":
     manual_test()
