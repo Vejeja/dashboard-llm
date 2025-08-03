@@ -1,10 +1,3 @@
-# src/main.py
-"""
-Главный скрипт:
-1) Генерирует ответ от LLM (OpenRouterStrategy) с использованием системного промта из файла
-2) Переводит ответ на английский через YandexTranslator
-3) Создает эмбеддинги (короткий и длинный) для перевода через YandexEmbedStrategy
-"""
 import os
 from dotenv import load_dotenv
 import requests

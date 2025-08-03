@@ -1,5 +1,3 @@
-# src/nlp_module/llm.py
-
 import requests
 import re
 import os
@@ -27,7 +25,6 @@ class OpenRouterClient(BaseLLM):
         self.system_prompts = system_prompts or {}
         self.prompts_dir = prompts_dir or os.getenv("SYSTEM_PROMPTS_DIR", "prompts")
 
-        # ← вот тут исправили на api.openrouter.ai
         self.endpoint = os.getenv(
             "OPENROUTER_ENDPOINT"
         )
