@@ -1,4 +1,3 @@
-# src/main.py
 import os
 from dotenv import load_dotenv
 import requests
@@ -14,7 +13,6 @@ from nlp_module.translator import YandexTranslator
 from nlp_module.embed_strategy import YandexEmbedStrategy
 from nlp_module.embedder_context import Embedder
 
-# Загрузка .env
 load_dotenv()
 API_KEY       = os.getenv("OPENROUTER_API_KEY")
 CHAT_MODEL    = os.getenv("OPENROUTER_MODEL", "gpt-4o-mini")
